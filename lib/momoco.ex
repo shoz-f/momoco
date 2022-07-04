@@ -17,7 +17,7 @@ defmodule Momoco do
   end
 
   def start_link(_args \\ []) do
-    :python.start({:local, __MODULE__}, python_path: @momoco_path)
+    :python.start({:local, __MODULE__}, python: 'python3', python_path: @momoco_path)
     |> IO.inspect()
   end
 
