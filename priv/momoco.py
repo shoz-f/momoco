@@ -11,16 +11,16 @@
 ################################################################################
 
 #<IMPORT>
-import sys
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 #os.environ['CUDA_VISIBLE_DEVICES']='-1'
 import tensorflow as tf
 import onnx
 from onnx_tf.backend import prepare
+from tf2onnx.convert import _convert_common
+from tf2onnx import tf_loader, utils
 
-#tf_rep = prepare(onnx_model)  # prepare tf representation
-#tf_rep.export_graph("output_path")  # export the model
+from erlport.erlterms import Atom
 
 #<SUBROUTINE>###################################################################
 # Function:     
@@ -28,7 +28,16 @@ from onnx_tf.backend import prepare
 # Dependencies: 
 ################################################################################
 def load_onnx(path):
-    return onnx.load(path)
+    return onnx.load(path.decode('utf-8'))
+
+#<SUBROUTINE>###################################################################
+# Function:     
+# Description:  
+# Dependencies: 
+################################################################################
+def save_onnx(path, onnx):
+    utils.save_protobuf(path.decode('utf-8'), onnx)
+    return Atom(b'ok')
 
 #<SUBROUTINE>###################################################################
 # Function:     
@@ -37,20 +46,17 @@ def load_onnx(path):
 ################################################################################
 def to_tensorflow(onnx, path):
     tf_rep = prepare(onnx)
-    tf_rep.export_graph(path)
+    tf_rep.export_graph(path.decode('utf-8'))
 
 #<SUBROUTINE>###################################################################
 # Function:     
 # Description:  
 # Dependencies: 
 ################################################################################
-def to_tflite(onnx, path):
-    tf_rep = prepare(onnx)
-    tf_rep.export_graph(path)
-
+def to_tflite(path):
     converter = tf.lite.TFLiteConverter.from_saved_model(path)
     tflite = converter.convert()
-    with open(path.decode('utf-8')+".tflite", "wb") as f:
+    with open(path+".tflite", "wb") as f:
         f.write(tflite)
 
 #<SUBROUTINE>###################################################################
@@ -58,16 +64,19 @@ def to_tflite(onnx, path):
 # Description:  
 # Dependencies: 
 ################################################################################
-def get_tflite(path):
-    converter = tf.lite.TFLiteConverter.from_saved_model(path.decode('utf-8'))
-    tflite = converter.convert()
-    with open("log.txt", "a") as f:
-        print(sys.stdout, file=f)
-        print(sys.__stdout__, file=f)
-    return "ok"
+def from_saved_model(path):
+    graph_def, inputs, outputs, initialized_tables, tensors_to_rename = tf_loader.from_saved_model(path, None, None, return_initialized_tables=True, return_tensors_to_rename=True)
 
-def dummy():
-    os.dup2(2, 1)
-    return "ok"
+    with tf.device("/cpu:0"):
+        model_proto, _ = _convert_common(
+            graph_def,
+            name=path,
+            input_names=inputs,
+            output_names=outputs,
+            tensors_to_rename=tensors_to_rename,
+            initialized_tables=initialized_tables,
+            output_path="aaa.onnx")
+
+    return model_proto
 
 # momoco.py

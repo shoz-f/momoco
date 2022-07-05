@@ -4,7 +4,6 @@ defmodule Momoco do
   """
 
   @momoco_path Path.absname("./priv") |> to_charlist()
-  @timeout 10000
 
   def child_spec(opts) do
     %{
@@ -33,19 +32,15 @@ defmodule Momoco do
     :python.call(__MODULE__, :momoco, :load_onnx, [path])
   end
   
+  def save_onnx(onnx, path) do
+    :python.call(__MODULE__, :momoco, :save_onnx, [path, onnx])
+  end
+
   def to_tensorflow(onnx, path) do
     :python.call(__MODULE__, :momoco, :to_tensorflow, [onnx, path])
   end
   
-  def to_tflite(onnx, path) do
-    :python.call(__MODULE__, :momoco, :to_tflite, [onnx, path])
-  end
-  
-  def get_tflite(path) do
-    :python.call(__MODULE__, :momoco, :get_tflite, [path])
-  end
-  
-  def dummy() do
-    :python.call(__MODULE__, :momoco, :dummy, [])
+  def from_saved_model(path) do
+    :python.call(__MODULE__, :momoco, :from_saved_model, [path])
   end
 end
