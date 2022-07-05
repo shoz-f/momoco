@@ -35,8 +35,9 @@ def load_onnx(path):
 # Description:  
 # Dependencies: 
 ################################################################################
-def save_onnx(path, onnx):
+def save_onnx(onnx, path):
     utils.save_protobuf(path.decode('utf-8'), onnx)
+    #onnx.save(onnx, path.decode('utf-8'))
     return Atom(b'ok')
 
 #<SUBROUTINE>###################################################################
@@ -74,8 +75,22 @@ def from_saved_model(path):
             input_names=inputs,
             output_names=outputs,
             tensors_to_rename=tensors_to_rename,
-            initialized_tables=initialized_tables,
-            output_path="aaa.onnx")
+            initialized_tables=initialized_tables)
+
+    return model_proto
+
+#<SUBROUTINE>###################################################################
+# Function:     
+# Description:  
+# Dependencies: 
+################################################################################
+def from_tflite(path):
+    with tf.device("/cpu:0"):
+        model_proto, _ = _convert_common(
+            None,
+            name=path,
+            tflite_path=path,
+            output_path="xxx.onnx")
 
     return model_proto
 
