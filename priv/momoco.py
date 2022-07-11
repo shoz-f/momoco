@@ -19,8 +19,15 @@ import onnx
 from onnx_tf.backend import prepare
 from tf2onnx.convert import _convert_common
 from tf2onnx import tf_loader, utils
+from onnx2torch import convert
 
-from erlport.erlterms import Atom
+#<SUBROUTINE>###################################################################
+# Function:     
+# Description:  
+# Dependencies: 
+################################################################################
+def to_str(s):
+    return s.decode('utf-8') if isinstance(s, bytes) else s
 
 #<SUBROUTINE>###################################################################
 # Function:     
@@ -28,7 +35,9 @@ from erlport.erlterms import Atom
 # Dependencies: 
 ################################################################################
 def load_onnx(path):
-    return onnx.load(path.decode('utf-8'))
+    path = to_str(path)
+
+    return onnx.load(path)
 
 #<SUBROUTINE>###################################################################
 # Function:     
@@ -36,9 +45,10 @@ def load_onnx(path):
 # Dependencies: 
 ################################################################################
 def save_onnx(onnx, path):
-    utils.save_protobuf(path.decode('utf-8'), onnx)
+    path = to_str(path)
+
+    utils.save_protobuf(path, onnx)
     #onnx.save(onnx, path.decode('utf-8'))
-    return Atom(b'ok')
 
 #<SUBROUTINE>###################################################################
 # Function:     
@@ -46,8 +56,10 @@ def save_onnx(onnx, path):
 # Dependencies: 
 ################################################################################
 def to_tensorflow(onnx, path):
+    path = to_str(path)
+
     tf_rep = prepare(onnx)
-    tf_rep.export_graph(path.decode('utf-8'))
+    tf_rep.export_graph(path)
 
 #<SUBROUTINE>###################################################################
 # Function:     
@@ -55,10 +67,23 @@ def to_tensorflow(onnx, path):
 # Dependencies: 
 ################################################################################
 def to_tflite(path):
+    path = to_str(path)
+
     converter = tf.lite.TFLiteConverter.from_saved_model(path)
     tflite = converter.convert()
     with open(path+".tflite", "wb") as f:
         f.write(tflite)
+
+
+#<SUBROUTINE>###################################################################
+# Function:     
+# Description:  
+# Dependencies: 
+################################################################################
+def to_torch(onnx, path):
+    model = convert(onnx)
+    torch.jit.save(model, path)
+    return model
 
 #<SUBROUTINE>###################################################################
 # Function:     
@@ -66,6 +91,8 @@ def to_tflite(path):
 # Dependencies: 
 ################################################################################
 def from_saved_model(path):
+    path = to_str(path)
+
     graph_def, inputs, outputs, initialized_tables, tensors_to_rename = tf_loader.from_saved_model(path, None, None, return_initialized_tables=True, return_tensors_to_rename=True)
 
     with tf.device("/cpu:0"):
@@ -85,12 +112,13 @@ def from_saved_model(path):
 # Dependencies: 
 ################################################################################
 def from_tflite(path):
+    path = to_str(path)
+
     with tf.device("/cpu:0"):
         model_proto, _ = _convert_common(
             None,
             name=path,
-            tflite_path=path,
-            output_path="xxx.onnx")
+            tflite_path=path)
 
     return model_proto
 

@@ -2,3 +2,4 @@ tensorflow
 tensorflow-probability
 tf2onnx
 onnx-tf
+onnx2torch

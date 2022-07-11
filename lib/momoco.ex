@@ -38,8 +38,23 @@ defmodule Momoco do
 
   def to_tensorflow(onnx, path) do
     :python.call(__MODULE__, :momoco, :to_tensorflow, [onnx, path])
+    path
   end
   
+  def to_tflite(onnx, path) do
+    to_tensorflow(onnx, path)
+    |> to_tflite(path)
+  end
+  
+  def to_tflite(path) do
+    :python.call(__MODULE__, :momoco, :to_tflite, [path])
+    path
+  end
+
+  def to_torch(onnx, path) do
+    :python.call(__MODULE__, :momoco, :to_torch, [onnx, path])
+  end
+
   def from_saved_model(path) do
     :python.call(__MODULE__, :momoco, :from_saved_model, [path])
   end
