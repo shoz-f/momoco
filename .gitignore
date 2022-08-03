@@ -24,3 +24,9 @@ momoco-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# Ignore compiled python code
+*.pyc
+
+# Ignore model directory
+models/

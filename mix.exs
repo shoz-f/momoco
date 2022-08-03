@@ -22,7 +22,10 @@ defmodule Momoco.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:erlport, "~> 0.10.1"}
+      {:erlport, "~> 0.10.1"},
+      {:onnxs, "~> 0.2.0"},
+      {:eflatbuffers, "~> 0.1.0"},
+      {:axon_onnx, github: "elixir-nx/axon_onnx"},
     ]
   end
 end

@@ -44,10 +44,10 @@ def load_onnx(path):
 # Description:  
 # Dependencies: 
 ################################################################################
-def save_onnx(onnx, path):
+def save_onnx(model, path):
     path = to_str(path)
 
-    utils.save_protobuf(path, onnx)
+    utils.save_protobuf(path, model)
     #onnx.save(onnx, path.decode('utf-8'))
 
 #<SUBROUTINE>###################################################################
@@ -55,10 +55,10 @@ def save_onnx(onnx, path):
 # Description:  
 # Dependencies: 
 ################################################################################
-def to_tensorflow(onnx, path):
+def to_tensorflow(model, path):
     path = to_str(path)
 
-    tf_rep = prepare(onnx)
+    tf_rep = prepare(model)
     tf_rep.export_graph(path)
 
 #<SUBROUTINE>###################################################################
@@ -121,5 +121,23 @@ def from_tflite(path):
             tflite_path=path)
 
     return model_proto
+
+#<SUBROUTINE>###################################################################
+# Function:     
+# Description:  
+# Dependencies: 
+################################################################################
+def remove_initializer_from_input(model, path):
+    inputs = model.graph.input
+
+    name_to_input = {}
+    for input in inputs:
+        name_to_input[input.name] = input
+
+    for initializer in model.graph.initializer:
+        if initializer.name in name_to_input:
+            inputs.remove(name_to_input[initializer.name])
+
+    onnx.save(model, path)
 
 # momoco.py
